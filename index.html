@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="RATING" content="RTA-5042-1996-1400-1577-RTA">
+<title>夜色剧场</title>
+<style>
+  body{margin:0;background:#0b0b0f;color:#f4d9e8;font-family:sans-serif;}
+  .top{background:linear-gradient(135deg,#3a0d2a,#0b0b0f);padding:20px;text-align:center;}
+  .top h1{color:#ff6bb0;font-size:24px;margin:0;}
+  .top p{color:#b89;font-size:13px;margin:6px 0 0;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px;}
+  .card{background:#16161d;border-radius:14px;overflow:hidden;border:1px solid #2a2a35;cursor:pointer;}
+  .card img{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;background:#2a2a35;}
+  .card .info{padding:10px;}
+  .card .t{font-size:15px;font-weight:bold;color:#ffe3f0;margin:0 0 8px;}
+  .card .btn{display:block;background:#ff4d94;color:#fff;text-align:center;text-decoration:none;padding:9px 0;border-radius:20px;font-size:14px;}
+  .layer{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:50;display:none;overflow:auto;}
+  .layer.show{display:block;}
+  .player-head{position:sticky;top:0;background:#0b0b0f;padding:12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a2a35;}
+  .player-head .tt{color:#ffe3f0;font-size:16px;font-weight:bold;}
+  .player-head button{background:#ff4d94;color:#fff;border:0;border-radius:18px;padding:8px 16px;font-size:14px;}
+  .tgbox{padding:16px;max-width:680px;margin:0 auto;}
+  .tgbox .open{display:block;margin-top:12px;text-align:center;color:#ff6bb0;}
+</style>
+</head>
+<body>
+  <div class="top">
+    <h1>夜色剧场</h1>
+    <p>点剧集即可在线观看</p>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="layer" id="player">
+    <div class="player-head">
+      <div class="tt" id="ptitle"></div>
+      <button id="back">返回</button>
+    </div>
+    <div class="tgbox">
+      <div id="pbox"></div>
+      <a class="open" id="popen" href="#" target="_blank">在纸飞机打开</a>
+    </div>
+  </div>
+
+<script>
+var VIDEOS = [
+  { id:'v1', title:'视频 1', thumb:'', url:'https://t.me/aidj2048/7' }
+];
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+function render(){
+  var html='';
+  for(var i=0;i<VIDEOS.length;i++){
+    var v=VIDEOS[i];
+    html += '<div class="card" data-id="'+esc(v.id)+'">'+
+      '<img src="'+esc(v.thumb)+'" loading="lazy" alt="">'+
+      '<div class="info"><div class="t">'+esc(v.title)+'</div>'+
+      '<span class="btn">▶ 立即观看</span></div></div>';
+  }
+  document.getElementById('grid').innerHTML = html;
+}
+
+document.getElementById('grid').addEventListener('click', function(e){
+  var c=e.target.closest('.card'); if(!c) return;
+  var v=VIDEOS.find(function(x){ return x.id===c.dataset.id; });
+  if(v) play(v.title, v.url);
+});
+
+function play(title, url){
+  document.getElementById('ptitle').textContent = title;
+  document.getElementById('popen').href = url;
+  var box = document.getElementById('pbox');
+  box.innerHTML = '';
+  var m = url.match(/t\.me\/([^\/]+)\/(\d+)/);
+  if(m){
+        var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://telegram.org/js/telegram-widget.js?22';
+    s.setAttribute('data-telegram-post', m[1] + '/' + m[2]);
+    s.setAttribute('data-width', '100%');
+    box.appendChild(s);
+  }
+  document.getElementById('player').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+
+document.getElementById('back').addEventListener('click', function(){
+  document.getElementById('player').classList.remove('show');
+  document.getElementById('pbox').innerHTML='';
+  document.body.style.overflow='';
+});
+
+render();
+</script>
+</body>
+</html>
