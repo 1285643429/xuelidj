@@ -16,14 +16,14 @@
   .card .info{padding:10px;}
   .card .t{font-size:15px;font-weight:bold;color:#ffe3f0;margin:0 0 8px;}
   .card .btn{display:block;background:#ff4d94;color:#fff;text-align:center;text-decoration:none;padding:9px 0;border-radius:20px;font-size:14px;}
-  .layer{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:50;display:none;}
-  .layer.show{display:flex;flex-direction:column;}
-  .player-head{padding:12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a2a35;}
+
+  .layer{position:fixed;inset:0;background:#000;z-index:50;display:none;flex-direction:column;}
+  .layer.show{display:flex;}
+  .player-head{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.7);}
   .player-head .tt{color:#ffe3f0;font-size:16px;font-weight:bold;}
   .player-head button{background:#ff4d94;color:#fff;border:0;border-radius:18px;padding:8px 16px;font-size:14px;}
-  .tgbox{flex:1;display:flex;align-items:center;justify-content:center;background:#000;}
-  .tgbox .vw{position:relative;width:100%;padding-top:56.25%;}
-  .tgbox .vw iframe{border:0;position:absolute;top:0;height:100%;width:100%;}
+  .tgbox{flex:1;position:relative;background:#000;}
+  .tgbox iframe{border:0;position:absolute;top:0;left:0;width:100%;height:100%;}
 </style>
 </head>
 <body>
@@ -79,7 +79,7 @@ document.getElementById('grid').addEventListener('click', function(e){
 function play(title, url){
   document.getElementById('ptitle').textContent = title;
   var box = document.getElementById('pbox');
-    box.innerHTML = '<div class="vw"><iframe src="'+url+'" loading="lazy" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen;" allowfullscreen="true"></iframe></div>';
+    box.innerHTML = '<iframe src="'+url+'" loading="lazy" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen;" allowfullscreen="true"></iframe>';
   document.getElementById('player').classList.add('show');
   document.body.style.overflow='hidden';
 }
