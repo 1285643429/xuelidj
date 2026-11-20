@@ -4,35 +4,173 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="RATING" content="RTA-5042-1996-1400-1577-RTA">
-<title>夜色剧场</title>
+<title>雪梨短剧</title>
 <style>
-  body{margin:0;background:#0b0b0f;color:#f4d9e8;font-family:sans-serif;}
-  .top{background:linear-gradient(135deg,#3a0d2a,#0b0b0f);padding:20px;text-align:center;}
-  .top h1{color:#ff6bb0;font-size:24px;margin:0;}
-  .top p{color:#b89;font-size:13px;margin:6px 0 0;}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px;}
-  .card{background:#16161d;border-radius:14px;overflow:hidden;border:1px solid #2a2a35;cursor:pointer;}
-  .card img{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;background:#2a2a35;}
-  .card .info{padding:10px;}
-  .card .t{font-size:15px;font-weight:bold;color:#ffe3f0;margin:0 0 8px;}
-  .card .btn{display:block;background:#ff4d94;color:#fff;text-align:center;text-decoration:none;padding:9px 0;border-radius:20px;font-size:14px;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:#0b0b10;color:#f0d9e6;font-family:-apple-system,"PingFang SC",sans-serif;overflow:hidden;}
 
-  .layer{position:fixed;inset:0;background:#000;z-index:50;display:none;flex-direction:column;}
+  .page{display:none;position:absolute;top:0;left:0;right:0;bottom:58px;overflow-y:auto;background:#0b0b10;}
+  .page.show{display:block;}
+
+  #page-home{overflow:hidden;}
+  .feed{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;}
+  .feed::-webkit-scrollbar{display:none;}
+  .feeditem{position:relative;height:100%;scroll-snap-align:start;background:#000;}
+  .feeditem iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+  .feeditem .overlay{position:absolute;left:0;right:0;bottom:0;padding:16px 14px 20px;background:linear-gradient(transparent,rgba(0,0,0,.78));z-index:5;pointer-events:none;}
+  .feeditem .title{font-size:18px;font-weight:bold;color:#fff;pointer-events:auto;}
+  .feeditem .desc{font-size:13px;color:#ffd0e4;margin-top:6px;pointer-events:auto;}
+  .feeditem .tags{margin-top:8px;display:flex;gap:8px;pointer-events:auto;}
+  .feeditem .tag{font-size:11px;color:#ff9ec7;background:rgba(255,77,148,.18);padding:3px 9px;border-radius:8px;}
+  .feeditem .open{pointer-events:auto;margin-top:12px;display:inline-flex;align-items:center;background:rgba(255,77,148,.92);color:#fff;font-size:13px;padding:9px 18px;border-radius:20px;font-weight:bold;cursor:pointer;}
+  .feeditem .side{position:absolute;right:10px;bottom:130px;z-index:6;display:flex;flex-direction:column;gap:18px;align-items:center;pointer-events:none;}
+  .feeditem .side .si{pointer-events:auto;display:flex;flex-direction:column;align-items:center;color:#fff;font-size:11px;gap:3px;cursor:pointer;}
+  .feeditem .side .si .ic{font-size:26px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));}
+  .feedtop{position:absolute;top:0;left:0;right:0;z-index:7;display:flex;justify-content:center;gap:24px;padding:14px;background:linear-gradient(rgba(0,0,0,.5),transparent);pointer-events:none;}
+  .feedtop .ft{font-size:15px;color:#b99fae;position:relative;cursor:pointer;pointer-events:auto;}
+  .feedtop .ft.on{color:#fff;font-weight:bold;}
+  .feedtop .ft.on::after{content:'';position:absolute;left:50%;transform:translateX(-50%);bottom:-6px;width:16px;height:3px;border-radius:2px;background:#ff4d94;}
+  .feedtop .fsearch{position:absolute;right:16px;top:14px;color:#fff;font-size:20px;cursor:pointer;pointer-events:auto;}
+
+  .bar{position:sticky;top:0;z-index:20;background:#0b0b10;padding:12px 14px;}
+  .searchbox{display:flex;align-items:center;background:#1b1b24;border:1px solid #2c2c38;border-radius:22px;padding:9px 14px;}
+  .searchbox input{flex:1;background:none;border:0;outline:0;color:#ffe3f0;font-size:13px;}
+  .searchbox input::placeholder{color:#7a6a78;}
+  .searchbox .sicon{color:#ff5fa2;margin-right:8px;font-size:14px;}
+  .cats{display:flex;gap:8px;overflow-x:auto;padding:10px 14px;scrollbar-width:none;background:#0b0b10;}
+  .cats::-webkit-scrollbar{display:none;}
+  .cat{flex:0 0 auto;padding:7px 16px;border-radius:18px;background:#1b1b24;color:#b99fae;font-size:13px;border:1px solid #2c2c38;cursor:pointer;}
+  .cat.on{background:linear-gradient(135deg,#ff4d94,#ff7ab8);color:#fff;border-color:transparent;font-weight:bold;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:6px 14px 14px;}
+    .card{background:#16161d;border-radius:14px;overflow:hidden;border:1px solid #23232e;cursor:pointer;}
+  .card .cv{position:relative;aspect-ratio:3/4;background:#23232e;}
+  .card .cv img{width:100%;height:100%;object-fit:cover;display:block;}
+  .card .cv .heat{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.55);color:#ff9ec7;font-size:10px;padding:3px 7px;border-radius:8px;}
+  .card .cv .lock{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:#ffd0e4;font-size:10px;padding:3px 7px;border-radius:8px;}
+  .card .cv .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#ff5fa2;font-size:36px;text-shadow:0 2px 14px rgba(0,0,0,.7);opacity:.9;}
+  .card .t{font-size:13px;font-weight:bold;color:#ffe3f0;padding:9px 10px 3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .card .s{font-size:11px;color:#8a7a83;padding:0 10px 10px;}
+
+  .layer{position:fixed;inset:0;background:#000;z-index:60;display:none;flex-direction:column;}
   .layer.show{display:flex;}
   .player-head{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.7);}
-  .player-head .tt{color:#ffe3f0;font-size:16px;font-weight:bold;}
-  .player-head button{background:#ff4d94;color:#fff;border:0;border-radius:18px;padding:8px 16px;font-size:14px;}
+  .player-head .tt{color:#ffe3f0;font-size:15px;font-weight:bold;}
+  .player-head button{background:#ff4d94;color:#fff;border:0;border-radius:18px;padding:7px 16px;font-size:13px;cursor:pointer;}
   .tgbox{flex:1;position:relative;background:#000;}
   .tgbox iframe{border:0;position:absolute;top:0;left:0;width:100%;height:100%;}
+  .epbar{background:#101018;border-top:1px solid #23232e;padding:10px 14px;}
+  .epbar .lab{font-size:12px;color:#b99fae;margin-bottom:8px;}
+  .eps{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;}
+  .eps::-webkit-scrollbar{display:none;}
+  .ep{flex:0 0 auto;min-width:44px;height:44px;border-radius:10px;background:#1b1b24;border:1px solid #2c2c38;color:#ffe3f0;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .ep.on{background:linear-gradient(135deg,#ff4d94,#ff7ab8);border-color:transparent;font-weight:bold;}
+
+  .mehead{padding:24px 16px 16px;display:flex;align-items:center;gap:14px;}
+  .meava{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#ff4d94,#ff7ab8);display:flex;align-items:center;justify-content:center;font-size:26px;}
+  .meinfo .mname{font-size:19px;font-weight:bold;color:#ffe3f0;}
+  .meinfo .mid{font-size:11px;color:#8a7a83;margin-top:3px;}
+  .mecards{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 14px;}
+  .mecard{border-radius:14px;padding:14px;position:relative;overflow:hidden;}
+  .mecard.coin{background:linear-gradient(135deg,#2a1a0d,#4a3418);border:1px solid #5a4426;}
+  .mecard.vip{background:linear-gradient(135deg,#3a0d2a,#6b1b47);border:1px solid #6b1b47;}
+  .mecard .lab{font-size:12px;color:#ffd699;}
+  .mecard.vip .lab{color:#ffb3d1;}
+  .mecard .num{font-size:22px;font-weight:bold;color:#ffe9b0;margin:4px 0 10px;}
+  .mecard.vip .num{font-size:14px;color:#ffe3f0;}
+  .mecard .btn{display:inline-block;background:linear-gradient(135deg,#ffb347,#ffcf7a);color:#4a2c00;font-size:12px;padding:6px 14px;border-radius:14px;font-weight:bold;cursor:pointer;}
+  .mecard.vip .btn{background:linear-gradient(135deg,#ff4d94,#ff7ab8);color:#fff;}
+  .mecard .deco{position:absolute;right:8px;bottom:6px;font-size:34px;opacity:.5;}
+  .melist{margin:14px;background:#16161d;border:1px solid #23232e;border-radius:14px;overflow:hidden;}
+  .merow{display:flex;align-items:center;padding:14px;border-bottom:1px solid #1f1f28;cursor:pointer;}
+  .merow:last-child{border-bottom:0;}
+  .merow .mic{width:34px;height:34px;border-radius:9px;background:#23232e;display:flex;align-items:center;justify-content:center;font-size:16px;margin-right:12px;}
+  .merow .mt{flex:1;font-size:14px;color:#ffe3f0;}
+    .merow .mv{font-size:11px;color:#ff9ec7;background:rgba(255,77,148,.15);padding:2px 8px;border-radius:8px;margin-right:8px;}
+  .merow .arw{color:#5a4a55;font-size:14px;}
+  .mehistory{margin:14px;}
+  .mehtabs{display:flex;gap:20px;border-bottom:1px solid #1b1b24;padding-bottom:8px;}
+  .mehtab{font-size:14px;color:#8a7a83;position:relative;cursor:pointer;}
+  .mehtab.on{color:#ffe3f0;font-weight:bold;}
+  .mehtab.on::after{content:'';position:absolute;left:50%;transform:translateX(-50%);bottom:-9px;width:18px;height:3px;border-radius:2px;background:linear-gradient(135deg,#ff4d94,#ff7ab8);}
+  .meempty{padding:40px 0;text-align:center;color:#5a4a55;font-size:13px;}
+  .meempty .eic{font-size:40px;display:block;margin-bottom:10px;opacity:.5;}
+
+  .tabbar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:#101018;border-top:1px solid #23232e;display:flex;height:58px;}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#8a7a83;font-size:11px;gap:3px;cursor:pointer;}
+  .tab .ic{font-size:20px;}
+  .tab.on{color:#2ee6a8;}
+
+  .empty{padding:40px;text-align:center;color:#7a6a78;font-size:13px;}
 </style>
 </head>
 <body>
-  <div class="top">
-    <h1>夜色剧场</h1>
-    <p>点剧集直接在线播放</p>
+
+  <div class="page show" id="page-home">
+    <div class="feedtop">
+      <div class="ft">随机</div>
+      <div class="ft on">推荐</div>
+      <div class="fsearch" id="feedSearch">🔍</div>
+    </div>
+    <div class="feed" id="feed"></div>
   </div>
 
-  <div class="grid" id="grid"></div>
+  <div class="page" id="page-juchang">
+    <div class="bar"><div class="searchbox"><span class="sicon">🔍</span><input class="q" type="text" placeholder="搜索剧场…"></div></div>
+    <div class="cats" id="jc-cats"></div>
+    <div class="grid" id="jc-grid"></div>
+    <div class="empty" id="jc-empty" style="display:none">没有找到内容</div>
+  </div>
+
+  <div class="page" id="page-pianku">
+    <div class="bar"><div class="searchbox"><span class="sicon">🔍</span><input class="q" type="text" placeholder="搜索片库…"></div></div>
+    <div class="cats" id="pk-cats"></div>
+    <div class="grid" id="pk-grid"></div>
+    <div class="empty" id="pk-empty" style="display:none">没有找到内容</div>
+  </div>
+
+  <div class="page" id="page-me">
+    <div class="mehead">
+      <div class="meava">👤</div>
+      <div class="meinfo">
+        <div class="mname">雪梨用户</div>
+        <div class="mid">ID：11587376</div>
+      </div>
+    </div>
+    <div class="mecards">
+      <div class="mecard coin">
+        <div class="lab">金币余额</div>
+        <div class="num">0</div>
+        <span class="btn" id="rechargeBtn">充值金币 ›</span>
+        <div class="deco">🪙</div>
+      </div>
+      <div class="mecard vip">
+        <div class="lab">我的会员</div>
+        <div class="num">当前未开通会员</div>
+        <span class="btn" id="openVipBtn">去开通 ›</span>
+        <div class="deco">🎁</div>
+      </div>
+    </div>
+    <div class="melist">
+      <div class="merow" data-act="sign"><div class="mic">📅</div><div class="mt">签到福利</div><div class="arw">›</div></div>
+      <div class="merow" data-act="agent"><div class="mic">💰</div><div class="mt">代理中心</div><div class="arw">›</div></div>
+      <div class="merow" data-act="update"><div class="mic">🔄</div><div class="mt">更新中心</div><div class="arw">›</div></div>
+      <div class="merow" data-act="urge"><div class="mic">🔔</div><div class="mt">催更中心</div><div class="arw">›</div></div>
+      <div class="merow" data-act="brand"><div class="mic">🏅</div><div class="mt">品牌官网</div><div class="arw">›</div></div>
+      <div class="merow" data-act="social"><div class="mic">🎬</div><div class="mt">官方社媒</div><div class="arw">›</div></div>
+      <div class="merow" data-act="email"><div class="mic">✉️</div><div class="mt">绑定邮箱</div><div class="mv">100金币</div><div class="arw">›</div></div>
+            <div class="merow" data-act="apk"><div class="mic">📱</div><div class="mt">下载 App</div><div class="arw">›</div></div>
+    </div>
+    <div class="mehistory">
+      <div class="mehtabs">
+        <div class="mehtab on">历史</div>
+        <div class="mehtab">收藏</div>
+        <div class="mehtab">点赞</div>
+      </div>
+      <div class="meempty"><span class="eic">📭</span>暂无记录</div>
+    </div>
+  </div>
 
   <div class="layer" id="player">
     <div class="player-head">
@@ -40,57 +178,201 @@
       <button id="back">返回</button>
     </div>
     <div class="tgbox" id="pbox"></div>
+    <div class="epbar">
+      <div class="lab" id="eplab">选集</div>
+      <div class="eps" id="eps"></div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab on" data-tab="home"><div class="ic">🎬</div>首页</div>
+    <div class="tab" data-tab="juchang"><div class="ic">📺</div>剧场</div>
+    <div class="tab" data-tab="pianku"><div class="ic">🎞️</div>片库</div>
+    <div class="tab" data-tab="me"><div class="ic">👤</div>我的</div>
   </div>
 
 <script>
-var VIDEOS = [
-  { id:'v1', title:'第1集', thumb:'',
-    url:'https://player.mediadelivery.net/embed/816201/c16918c5-c2e8-4776-b1c1-5668b531389f?autoplay=true&loop=false&muted=true&preload=true&responsive=true' },
-  { id:'v2', title:'第2集', thumb:'',
-    url:'https://player.mediadelivery.net/embed/816201/2a9243b7-9096-49c2-b03e-18f8b08d2a37?autoplay=true&loop=false&muted=true&preload=true&responsive=true' },
-  { id:'v3', title:'第3集', thumb:'',
-    url:'https://player.mediadelivery.net/embed/816201/ce3681b8-dafa-496f-98c4-4bd4851d6475?autoplay=true&loop=false&muted=true&preload=true&responsive=true' }
+var APK_URL = 'https://raw.githubusercontent.com/1285643429/xuelidj/main/xueli.apk';
+
+var JC_CATS = ['全部','推荐','都市','人妻','师生','职场','古装','VIP专区'];
+var PK_CATS = ['全部','最新','最热','短剧','系列','完结','连载中'];
+
+var SHOWS = [
+  { id:'s1', title:'正经设计师', tag:'都市', thumb:'', hot:true, vip:false, heat:'3.2万',
+    desc:'职场精英的隐秘设计图…',
+    episodes:[
+      { title:'第1集', url:'https://player.mediadelivery.net/embed/816201/c16918c5-c2e8-4776-b1c1-5668b531389f?autoplay=true&loop=false&muted=true&preload=true&responsive=true' },
+      { title:'第2集', url:'https://player.mediadelivery.net/embed/816201/2a9243b7-9096-49c2-b03e-18f8b08d2a37?autoplay=true&loop=false&muted=true&preload=true&responsive=true' },
+      { title:'第3集', url:'https://player.mediadelivery.net/embed/816201/ce3681b8-dafa-496f-98c4-4bd4851d6475?autoplay=true&loop=false&muted=true&preload=true&responsive=true' }
+    ]}
 ];
 
+var curJcCat='全部', curPkCat='全部', curShow=null, curEp=0;
+
 function esc(s){
-  return String(s).replace(/[&<>"']/g, function(c){
+  return String(s).replace(/[&<>"']/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
   });
 }
 
-function render(){
+function buildFeed(){
+  var pool=[];
+  SHOWS.forEach(function(s){
+    s.episodes.forEach(function(ep){ pool.push({show:s, ep:ep}); });
+  });
+  pool.sort(function(){return Math.random()-0.5;});
   var html='';
-  for(var i=0;i<VIDEOS.length;i++){
-    var v=VIDEOS[i];
-    html += '<div class="card" data-id="'+esc(v.id)+'">'+
-      '<img src="'+esc(v.thumb)+'" loading="lazy" alt="">'+
-      '<div class="info"><div class="t">'+esc(v.title)+'</div>'+
-      '<span class="btn">▶ 立即播放</span></div></div>';
-  }
-  document.getElementById('grid').innerHTML = html;
+  pool.forEach(function(item){
+    var s=item.show, ep=item.ep;
+    html+='<div class="feeditem">'+
+      '<iframe src="'+ep.url+'" loading="lazy" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen;" allowfullscreen="true"></iframe>'+
+      '<div class="side">'+
+        '<div class="si"><div class="ic">❤️</div>'+(Math.floor(Math.random()*9000)+1000)+'</div>'+
+        '<div class="si"><div class="ic">💬</div>'+(Math.floor(Math.random()*500)+10)+'</div>'+
+        '<div class="si"><div class="ic">⭐</div>'+(Math.floor(Math.random()*800)+50)+'</div>'+
+        '<div class="si"><div class="ic">↗️</div>分享</div>'+
+      '</div>'+
+      '<div class="overlay">'+
+        '<div class="title">'+esc(s.title)+' '+esc(ep.title)+'</div>'+
+        '<div class="desc">'+esc(s.desc||'')+'</div>'+
+        '<div class="tags"><span class="tag">#'+esc(s.tag)+'</span><span class="tag">#成人</span><span class="tag">#短剧</span></div>'+
+        '<div class="open" data-sid="'+esc(s.id)+'">观看完整短剧 · 全 '+s.episodes.length+' 集 ›</div>'+
+      '</div>'+
+    '</div>';
+  });
+  document.getElementById('feed').innerHTML=html;
 }
 
-document.getElementById('grid').addEventListener('click', function(e){
-  var c=e.target.closest('.card'); if(!c) return;
-  var v=VIDEOS.find(function(x){ return x.id===c.dataset.id; });
-  if(v) play(v.title, v.url);
+function renderCats(list, el, cur){
+  var h='';
+  for(var i=0;i<list.length;i++){
+    h+='<div class="cat'+(list[i]===cur?' on':'')+'" data-c="'+esc(list[i])+'">'+esc(list[i])+'</div>';
+  }
+  el.innerHTML=h;
+}
+function cardHtml(s){
+  var n=s.episodes.length;
+    return '<div class="card" data-id="'+esc(s.id)+'">'+
+    '<div class="cv"><img src="'+esc(s.thumb)+'" loading="lazy" alt="">'+
+    '<span class="heat">🔥 '+esc(s.heat||'')+'热度</span>'+
+    (s.vip?'<span class="lock">VIP</span>':'')+
+    '<div class="play">▶</div></div>'+
+    '<div class="t">'+esc(s.title)+'</div>'+
+    '<div class="s">'+esc(s.tag)+' · 更新至'+n+'集</div></div>';
+}
+function filterShows(cat, kw){
+  return SHOWS.filter(function(s){
+    var okC = cat==='全部'||s.tag===cat||(cat==='推荐'&&s.hot)||(cat==='VIP专区'&&s.vip)||(cat==='最热'&&s.hot);
+    var okK = !kw||s.title.toLowerCase().indexOf(kw)>=0;
+    return okC&&okK;
+  });
+}
+function renderJC(){
+  var kw=document.querySelector('#page-juchang .q').value.trim().toLowerCase();
+  var list=filterShows(curJcCat,kw);
+  document.getElementById('jc-grid').innerHTML=list.map(cardHtml).join('');
+  document.getElementById('jc-empty').style.display=list.length?'none':'block';
+}
+function renderPK(){
+  var kw=document.querySelector('#page-pianku .q').value.trim().toLowerCase();
+  var list=filterShows(curPkCat,kw);
+  document.getElementById('pk-grid').innerHTML=list.map(cardHtml).join('');
+  document.getElementById('pk-empty').style.display=list.length?'none':'block';
+}
+
+function openShow(s){
+  curShow=s;curEp=0;renderEps();playEp(0);
+  document.getElementById('player').classList.add('show');
+}
+function renderEps(){
+  var n=curShow.episodes.length,h='';
+  for(var i=0;i<n;i++)h+='<div class="ep'+(i===curEp?' on':'')+'" data-i="'+i+'">'+(i+1)+'</div>';
+  document.getElementById('eps').innerHTML=h;
+  document.getElementById('eplab').textContent='选集 更新至 '+n+' 集';
+}
+function playEp(i){
+  curEp=i;var ep=curShow.episodes[i];
+  document.getElementById('ptitle').textContent=curShow.title+' '+ep.title;
+  document.getElementById('pbox').innerHTML='<iframe src="'+ep.url+'" loading="lazy" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen;" allowfullscreen="true"></iframe>';
+  renderEps();
+}
+
+function bindCard(el){
+  el.addEventListener('click',function(e){
+    var c=e.target.closest('.card');if(!c)return;
+    var s=SHOWS.find(function(x){return x.id===c.dataset.id;});
+    if(s)openShow(s);
+  });
+}
+bindCard(document.getElementById('jc-grid'));
+bindCard(document.getElementById('pk-grid'));
+
+document.getElementById('jc-cats').addEventListener('click',function(e){
+  var c=e.target.closest('.cat');if(!c)return;
+  curJcCat=c.dataset.c;
+  renderCats(JC_CATS,document.getElementById('jc-cats'),curJcCat);
+  renderJC();
+});
+document.getElementById('pk-cats').addEventListener('click',function(e){
+  var c=e.target.closest('.cat');if(!c)return;
+  curPkCat=c.dataset.c;
+  renderCats(PK_CATS,document.getElementById('pk-cats'),curPkCat);
+  renderPK();
+});
+document.querySelector('#page-juchang .q').addEventListener('input',renderJC);
+document.querySelector('#page-pianku .q').addEventListener('input',renderPK);
+
+document.getElementById('feed').addEventListener('click',function(e){
+  var o=e.target.closest('.open');if(!o)return;
+  var s=SHOWS.find(function(x){return x.id===o.dataset.sid;});
+  if(s)openShow(s);
 });
 
-function play(title, url){
-  document.getElementById('ptitle').textContent = title;
-  var box = document.getElementById('pbox');
-    box.innerHTML = '<iframe src="'+url+'" loading="lazy" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen;" allowfullscreen="true"></iframe>';
-  document.getElementById('player').classList.add('show');
-  document.body.style.overflow='hidden';
-}
-
-document.getElementById('back').addEventListener('click', function(){
+document.getElementById('eps').addEventListener('click',function(e){
+  var el=e.target.closest('.ep');if(!el)return;
+  playEp(parseInt(el.dataset.i,10));
+});
+document.getElementById('back').addEventListener('click',function(){
   document.getElementById('player').classList.remove('show');
   document.getElementById('pbox').innerHTML='';
-  document.body.style.overflow='';
 });
 
-render();
+document.querySelectorAll('.tab').forEach(function(el){
+  el.addEventListener('click',function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});
+    el.classList.add('on');
+    var t=el.dataset.tab;
+    var map={'home':'page-home','juchang':'page-juchang','pianku':'page-pianku','me':'page-me'};
+        for(var k in map){
+      document.getElementById(map[k]).classList.toggle('show', k===t);
+    }
+  });
+});
+
+document.querySelectorAll('.merow').forEach(function(el){
+  el.addEventListener('click',function(){
+    var act=el.dataset.act;
+    if(act==='apk'){ window.open(APK_URL,'_blank'); return; }
+    var names={sign:'签到福利',agent:'代理中心',update:'更新中心',urge:'催更中心',brand:'品牌官网',social:'官方社媒',email:'绑定邮箱'};
+    alert((names[act]||'该功能')+'即将上线，敬请期待～');
+  });
+});
+document.querySelectorAll('.mehtab').forEach(function(el){
+  el.addEventListener('click',function(){
+    document.querySelectorAll('.mehtab').forEach(function(x){x.classList.remove('on');});
+    el.classList.add('on');
+  });
+});
+document.getElementById('rechargeBtn').addEventListener('click',function(){alert('金币充值功能即将上线～');});
+document.getElementById('openVipBtn').addEventListener('click',function(){alert('会员开通功能即将上线～');});
+document.getElementById('feedSearch').addEventListener('click',function(){
+  document.querySelector('.tab[data-tab="juchang"]').click();
+});
+
+buildFeed();
+renderCats(JC_CATS,document.getElementById('jc-cats'),curJcCat);
+renderCats(PK_CATS,document.getElementById('pk-cats'),curPkCat);
+renderJC();renderPK();
 </script>
 </body>
 </html>
